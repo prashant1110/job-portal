@@ -4,18 +4,21 @@ import { Navigate, useLocation } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
   const { isSignedIn, user, isLoaded } = useUser();
-  const { pathname } = useLocation();
+  const location = useLocation();
 
   if (isLoaded && !isSignedIn && isSignedIn !== undefined) {
-    return <Navigate to="/?sign-in=true" />;
+    return <Navigate to={`/?sign-in=true&redirect=${location.pathname}`} replace />;
   }
 
   if (
     user !== undefined &&
     !user?.unsafeMetadata?.role &&
-    pathname !== "/onboarding"
-  )
-    return <Navigate to="/onboarding" />;
+    location.pathname !== "/onboarding"
+  ) {
+    const searchParams = new URLSearchParams(location.search);
+    const redirect = searchParams.get("redirect") || location.pathname;
+    return <Navigate to={`/onboarding?redirect=${redirect}`} replace />;
+  }
 
   return children;
 };

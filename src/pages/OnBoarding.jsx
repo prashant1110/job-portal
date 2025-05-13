@@ -1,18 +1,27 @@
 import React, { useEffect } from "react";
 import { MoonLoader } from "react-spinners";
 import { Button } from "./../components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 
 const OnBoarding = () => {
   const { isSignedIn, user, isLoaded } = useUser();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
+    const redirect = searchParams.get("redirect");
+
     if (user?.unsafeMetadata?.role) {
-      navigate(
-        user?.unsafeMetadata?.role === "candidate" ? "/jobs" : "/my-jobs"
-      );
+      if (redirect && redirect !== "/onboarding") {
+        navigate(redirect, { replace: true });
+      } else {
+        // fallback if no redirect param is present
+        navigate(
+          user.unsafeMetadata.role === "candidate" ? "/jobs" : "/my-jobs",
+          { replace: true }
+        );
+      }
     }
   }, [user]);
 
